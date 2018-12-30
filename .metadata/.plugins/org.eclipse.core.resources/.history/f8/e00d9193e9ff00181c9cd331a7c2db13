@@ -1,0 +1,64 @@
+
+
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import GarageCorba.IGarageRemote;
+import GarageCorba.IGarageRemoteHelper;
+import GarageCorba.Voiture;
+
+public class GuichetRestitutionCorba {
+
+	public static void main(String[] args) {
+		try 
+		{
+			//_______________ interface graphique___________________
+			createFenetre();
+			
+			
+			
+			
+			
+			//____jndi 
+			Context ctx=new InitialContext();
+			//____
+			Object obj=ctx.lookup("Garage1");
+			IGarageRemote stub=IGarageRemoteHelper.narrow((org.omg.CORBA.Object)obj);
+			
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+	}
+	private static void createFenetre() 
+	{
+		JButton restituer=new JButton("Restituer");
+		JComboBox cb = new JComboBox();
+		JTextField status=new JTextField("TextField", 20);
+		status.setEnabled(false);
+		cb.setEditable(false);
+		JPanel pane = new JPanel();
+		pane.add(restituer, BorderLayout.CENTER);
+		pane.add(cb, BorderLayout.CENTER);
+		pane.add(status, BorderLayout.PAGE_END);
+        //Create and set up the window.
+		
+		JFrame Guichet = new JFrame("Guichet Location Garage 1");
+		Guichet.setBounds(850, 10, 300, 200);
+		Guichet.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		Guichet.add(pane);
+		Guichet.setVisible(true);
+    }
+
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="Banque.IBanqueRemotePOA"/>
+<fullyQualifiedTypeName name="Banque.Compte"/>
+<fullyQualifiedTypeName name="java.lang.Math"/>
+<fullyQualifiedTypeName name="org.omg.CORBA.ORB"/>
+<fullyQualifiedTypeName name="org.omg.PortableServer.POA"/>
+<fullyQualifiedTypeName name="org.omg.PortableServer.POAHelper"/>
+<fullyQualifiedTypeName name="servants.serviceImp"/>
+<fullyQualifiedTypeName name="org.omg.CORBA.Context"/>
+<fullyQualifiedTypeName name="javax.naming.Context"/>
+<fullyQualifiedTypeName name="javax.naming.InitialContext"/>
+<fullyQualifiedTypeName name="Banque.IBanqueRemote"/>
+<fullyQualifiedTypeName name="Banque.IBanqueRemoteHelper"/>
+<fullyQualifiedTypeName name="org.omg.CORBA.Object"/>
+<fullyQualifiedTypeName name="java.lang.Boolean"/>
+</qualifiedTypeNameHistroy>

@@ -1,0 +1,25 @@
+package serveur;
+
+import java.util.ArrayList;
+
+import GarageCorba.IGarageRemotePOA;
+import GarageCorba.Voiture;
+
+public class ServiceImp extends IGarageRemotePOA{
+
+	
+	private int place=3;
+	
+    public ArrayList<Voiture> listvoiture=new ArrayList<Voiture>();
+	@Override
+	public Voiture[] afficheVoitures() 
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
+
+	
+
+}

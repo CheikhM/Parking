@@ -1,0 +1,561 @@
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.TextArea;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.border.BevelBorder;
+
+/*
+ * Apparition des aretes
+ */
+public class Graphe extends JPanel implements MouseListener,
+		MouseMotionListener {
+	
+	static final int CREATION_SOMMET = 1;
+	static final int ETIQUETAGE_SOMMET = 2;
+	static final int DEBUT_DEPLACEMENT_SOMMET = 3;
+	static final int SUITE_DEPLACEMENT_SOMMET = 4;
+	static final int DEBUT_CREATION_ARETE = 5;
+	static final int SUITE_CREATION_ARETE = 6;
+	static final int PARCOUR_GRAPHE = 7;
+	
+	static final int TOUT_PRES = 10;
+	//___description
+	TextArea txt=new TextArea();
+	JFrame description= new JFrame("Description");
+	JLabel barreEtat;
+	int etat;
+	// les variables d'algorithme ____
+	 private Thread t;
+	// initiateur
+	int init;
+	float initX;
+	float initY;
+	
+	int[] election;
+	
+	Sommet sommetSelectionne;
+
+	Graphe() {
+		JFrame cadre = new JFrame("Parcour du graphe");
+		cadre.setBounds(100, 50, 600, 500);
+		cadre.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		this.setBackground(Color.WHITE);
+		this.addMouseListener(this);
+		this.addMouseMotionListener(this);
+		barreEtat = new JLabel("Choisir une action");
+		barreEtat.setBorder(BorderFactory
+				.createBevelBorder(BevelBorder.LOWERED));
+
+		cadre.add(this, BorderLayout.CENTER);
+		cadre.add(barreEtat, BorderLayout.SOUTH);
+		cadre.setJMenuBar(creerBarreMenus());
+		cadre.setVisible(true);
+		
+		
+	}
+
+	JMenuBar creerBarreMenus() {
+		JMenuBar barre = new JMenuBar();
+		JMenu menu = new JMenu("Fichier");
+		barre.add(menu);
+
+		JMenuItem start = new JMenuItem("Start");
+		menu.add(start);
+		start.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) 
+			{
+				etat = PARCOUR_GRAPHE;
+				rafraichirBarreEtat();
+				System.out.println("");
+				String tab[]=Sommet.getAllSommet();
+				if(tab==null)
+				{
+					message("creation du graphe");
+				}else
+				{
+					election=new int[tab.length];
+					int i = 0;
+					while( i < tab.length) 
+					{
+						election[i]=0;
+						i++;
+					}
+					
+					String smt;
+					smt=choixInit("");
+					while(smt!=null) 
+					{
+					Boolean trouve=false;
+					i = 0;
+					while( i < tab.length && trouve==false) 
+					{
+						
+						if (tab[i].equals(smt)) 
+						{
+							election[i]=1;
+							trouve=true;
+						}
+						i++;
+						
+					}
+					if (trouve) //touver ca veut dire le sommet existe 
+					{
+						
+						Sommet initiateur=Sommet.trouverSommet(smt);
+						init=initiateur.getNum();
+						initX=initiateur.getX();
+						initY=initiateur.getY();
+						for(Entry<String, Sommet> entry : Sommet.tousLesSommets.entrySet()) 
+						{
+							entry.getValue().setCouleur(Color.red);
+						    // traitements
+						}
+						paint(getGraphics());
+						paintJeton(getGraphics(),(int)initX-5,(int)initY-5);
+						try {
+						      Thread.sleep(1000);
+						    } catch (InterruptedException e) {
+						      e.printStackTrace();
+						    }
+						t = new Thread(new PlayAnimation());
+					    t.start();
+						//parcourGraphe();
+					} 
+					else 
+					{
+						message("choisir un nom existe dans le graphe");
+					}
+					smt=choixInit();
+					}
+					
+					
+				}
+					
+				
+				
+			}
+		});
+		
+		menu.addSeparator();
+		
+		JMenuItem item = new JMenuItem("Nouveau");
+		item.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				Arete.supprimerAllArete();
+				Sommet.supprimerAllSommet();
+				Sommet.cpte=0;
+				repaint();
+			}});
+		menu.add(item);
+
+		menu = new JMenu("Actions");
+		barre.add(menu);
+
+		item = new JMenuItem("Creer sommet");
+		item.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				etat = CREATION_SOMMET;
+				rafraichirBarreEtat();
+			}
+		});
+		menu.add(item);
+
+		
+		item = new JMenuItem("Deplacer sommet");
+		item.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				etat = DEBUT_DEPLACEMENT_SOMMET;
+				rafraichirBarreEtat();
+			}
+		});
+		menu.add(item);
+
+		item = new JMenuItem("Creer arete");
+		item.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				etat = DEBUT_CREATION_ARETE;
+				rafraichirBarreEtat();
+			}
+		});
+		menu.add(item);
+		JMenuItem descri = new JMenuItem("Description");;
+		descri.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				
+				if (description.isVisible()==false) 
+				{
+					description.setBounds(700, 50, 500, 400);
+					description.add(txt);
+					txt.setEditable(false);
+					description.setVisible(true);
+				}
+				
+				//_________________________________________________________
+					
+					
+				
+				
+				
+			}
+		});
+		barre.add(descri);
+		return barre;
+	}
+
+	void rafraichirBarreEtat() {
+		switch (etat) {
+		case CREATION_SOMMET:
+			barreEtat
+					.setText("Creation sommet : cliquer pour designer l'endroit ou le poser");
+			break;
+		case ETIQUETAGE_SOMMET:
+			barreEtat
+					.setText("Etiquetage sommet : designer le sommet a etiqueter");
+			break;
+		case DEBUT_DEPLACEMENT_SOMMET:
+			barreEtat
+					.setText("Deplacement sommet : trainer le sommet a deplacer");
+			break;
+		case SUITE_DEPLACEMENT_SOMMET:
+			barreEtat
+					.setText("Deplacement sommet : lacher le sommet a la place voulue");
+			break;
+		case DEBUT_CREATION_ARETE:
+			barreEtat.setText("Creation arete : designer le premier sommet");
+			break;
+		case SUITE_CREATION_ARETE:
+			barreEtat.setText("Creation arete : designer le second sommet");
+			break;
+		case PARCOUR_GRAPHE:
+			barreEtat.setText("Parcour le graphe : initiateur");
+			break;
+			
+		}
+	}
+
+	Sommet sommetVoisin(int x, int y) {
+		
+		for(Entry<String, Sommet> entry : Sommet.tousLesSommets.entrySet()) 
+		{
+			if (Math.abs(x - entry.getValue().getX()) + Math.abs(y - entry.getValue().getY()) < TOUT_PRES)
+				return entry.getValue();
+		    // traitements
+		}
+		return null;
+	}
+	
+	
+	public void mousePressed(MouseEvent evt) {
+		Sommet sommet;
+
+		switch (etat) {
+		case CREATION_SOMMET:
+			new Sommet(evt.getX(), evt.getY());
+			repaint();
+			return;
+		case ETIQUETAGE_SOMMET:
+			sommet = sommetVoisin(evt.getX(), evt.getY());
+			if (sommet == null)
+				return;
+			String texte = JOptionPane.showInputDialog(this, "Nouveau texte:",
+					"Definition d'une etiquette", JOptionPane.QUESTION_MESSAGE);
+			if (texte != null)
+				sommet.setEtiquette(texte);
+			repaint();
+			return;
+		case DEBUT_DEPLACEMENT_SOMMET:
+			sommetSelectionne = sommetVoisin(evt.getX(), evt.getY());
+			if (sommetSelectionne == null)
+				return;
+			etat = SUITE_DEPLACEMENT_SOMMET;
+			rafraichirBarreEtat();
+			return;
+		case DEBUT_CREATION_ARETE:
+			sommetSelectionne = sommetVoisin(evt.getX(), evt.getY());
+			if (sommetSelectionne == null)
+				return;
+			etat = SUITE_CREATION_ARETE;
+			rafraichirBarreEtat();
+			return;
+		case SUITE_CREATION_ARETE:
+			sommet = sommetVoisin(evt.getX(), evt.getY());
+			if (sommet == null || sommet.equals(sommetSelectionne))
+				return;
+			new Arete(sommetSelectionne, sommet);
+			repaint();
+			etat = DEBUT_CREATION_ARETE;
+			rafraichirBarreEtat();
+			return;
+		}
+	}
+
+	public void mouseReleased(MouseEvent evt) {
+		if (etat == SUITE_DEPLACEMENT_SOMMET)
+			etat = DEBUT_DEPLACEMENT_SOMMET;
+		rafraichirBarreEtat();
+	}
+
+	public void mouseDragged(MouseEvent evt) {
+		if (etat == SUITE_DEPLACEMENT_SOMMET) {
+			sommetSelectionne.setPosition(evt.getX(), evt.getY());
+			repaint();
+		}
+	}
+
+	public void mouseMoved(MouseEvent evt) {
+	}
+
+	public void mouseClicked(MouseEvent evt) {
+	}
+
+	public void mouseEntered(MouseEvent evt) {
+	}
+
+	public void mouseExited(MouseEvent evt) {
+	}
+    
+	public void paint(Graphics g) {
+		super.paint(g);
+		Color cp = g.getColor();
+
+		g.setColor(Color.black);
+		Iterator<Arete> iterA = Arete.iterator();
+		while (iterA.hasNext()) {
+			Arete a = iterA.next();
+			g.drawLine(a.getOrig().getX(), a.getOrig().getY(), a.getExtr()
+					.getX(), a.getExtr().getY());
+		}
+
+		Iterator<Sommet> iterS = Sommet.iterator();
+		while (iterS.hasNext()) {
+			Sommet s = iterS.next();
+			g.setColor(s.getCouleur());
+			g.fillOval(s.getX() - 10, s.getY() - 10, 20,20);
+			if (s.getEtiquette() != null) {
+				g.setColor(Color.blue);
+				g.drawString(s.getEtiquette(), s.getX() + 10, s.getY() - 10);
+			}
+		}
+		g.setColor(cp);
+	}
+/*=====================================================================*/
+	public static void main(String[] args) {
+		new Graphe();
+	}
+	/**
+	 * choix du initiateur 
+	 * @param  
+	 * @return nom du initiateur 
+	 */
+	private String choixInit(String titre)
+	{
+		return JOptionPane.showInputDialog(this, titre,
+				"Election ", JOptionPane.QUESTION_MESSAGE);
+	}
+	/**
+	 * 
+	 * @param text votre message
+	 */
+	private void message(String text)
+	{
+		JOptionPane.showMessageDialog(this,text,"information",JOptionPane.INFORMATION_MESSAGE);
+	}
+	/**
+	 * creation d'un jeton
+	 * @param g
+	 * @param x position x
+	 * @param y position y
+	 */
+	public void paintJeton(Graphics g,int x,int y)
+	{                
+		g.setColor(Color.black);                     
+	    g.fillOval(x, y, 10, 10);
+	  } 
+	
+	public void deplacer(Sommet suivant)
+	{
+		int x=suivant.getX();
+		int y=suivant.getY();
+		
+		float dpx=(x-initX)/Math.abs(x-initX);
+		float dpy=(y-initY)/Math.abs(x-initX);
+		while (initX!=x)
+		{
+			
+			if (initX!=x) 
+			{
+				initX+=dpx;
+			}
+			if (initY!=y) 
+			{
+				initY+=dpy;
+			}
+			paint(getGraphics());
+			paintJeton(getGraphics(),(int)initX-5,(int)initY-5);
+			
+			 try {
+			      Thread.sleep(20);
+			    } catch (InterruptedException e) {
+			      e.printStackTrace();
+			    }
+			
+		}
+		
+	}
+	
+/*============================= Algorithme du parcours d'un graphe ================*/
+	/**
+	 * 
+	 * @param j  le sommet suivant
+	 * @param parent le sommet courant peur etre le premer pere peut etre non
+	 */
+	public void faire_suivant(int j,int parent,int graphe[][],int Pere[])
+	{
+		txt.append("\n");
+		Sommet.trouverSommet("s"+j).setCouleur(Color.GREEN);
+		if (Pere[j]==j && j!=init) //tester si le premier pere
+		{
+			Pere[j]=parent;
+			graphe[j][parent]=0;//eleminer le parent
+		}
+		
+		int prochain=extraire(j,graphe,Pere);
+		if (prochain!=-1) 
+		{
+			
+			System.out.println("s"+j+" envoyer_message_a(s"+prochain+",message,s"+init+")");//___envoyer un message pour le prochain
+			txt.append("\n s"+j+" envoyer_message_a(s"+prochain+",message,s"+init+")");
+			
+			deplacer(Sommet.trouverSommet("s"+prochain));// ____ deplacer le jeton vers le sommet prochain
+			faire_suivant(prochain,j,graphe,Pere);
+			
+		}else
+		{
+			if (j!=init)
+			{
+				System.out.println("s"+j+" renvoyer_message_a(s"+Pere[j]+",message,s"+init+") avec s"+Pere[j]+" est son pere");//___envoyer un message pour le prochain
+				txt.append("\n s"+j+" renvoyer_message_a(s"+Pere[j]+",message,s"+init+") avec s"+Pere[j]+" est son pere");
+				
+				deplacer(Sommet.trouverSommet("s"+Pere[j]));// ____ deplacer le jeton vers le sommet prochain
+				faire_suivant(Pere[j],j,graphe,Pere);
+			}
+			
+		}
+		
+		
+	}
+	/**
+	 * 
+	 * @param i le sommet courant
+	 * @param parent le pere du sommet courant
+	 * @return un des voisions s'il existe sinon  retourne -1 
+	 */
+	public int extraire(int i,int graphe[][],int Pere[])
+	{
+		for (int j = 0; j < graphe[i].length; j++) 
+		{
+			
+				if (graphe[i][j]==1)
+				{
+					
+					graphe[i][j]=0;
+					return j;
+				}
+			
+		}
+		return -1;
+		
+	}
+	public void parcourGraphe()
+	{
+		
+		
+		//_____________ initier des voisins ___________________
+		int dim=Sommet.nombreSommets();
+		//les voisins
+		int[][] graphe=new int [dim][dim];
+		Collection<Arete> arcs=Arete.getAllArete();
+		for( int i = 0; i< graphe.length; ++i)
+		{
+			   for( int j = 0; j<graphe[i].length; ++j)
+			   {
+				  if(i==j)
+				  {
+					  graphe[i][j]=-1;
+				  }
+				  else
+				  {
+					  graphe[i][j]=0;
+				  }
+			   }
+		}
+		for(Arete arc : arcs)
+		{
+			if(arc!=null)
+			{
+				graphe[arc.getOrig().getNum()][arc.getExtr().getNum()]=1;
+				graphe[arc.getExtr().getNum()][arc.getOrig().getNum()]=1;
+			}
+		}
+		//pere de sommet
+		
+		int[] Pere=new int[dim];
+		
+		for (int i = 0; i < Pere.length; i++)
+		{
+			Pere[i]=i;
+		}
+		
+		
+		//___ le pere du initiateur c'est il-meme
+		Pere[init]=init;
+		txt.setText("");
+		System.out.println(" _______________ start ____________________");
+		txt.append("\n _______________ start ____________________ \n");
+		
+		System.out.println("initiateur s"+init);
+		Sommet.trouverSommet("s"+init).setCouleur(Color.GREEN);
+		int prochain=extraire(init,graphe,Pere);
+		if (prochain!=-1) 
+		{
+			System.out.println("s"+init+" envoyer_message_a(s"+prochain+",message,s"+init+")");//___envoyer un message pour le prochain
+			txt.append("\n s"+init+" envoyer_message_a(s"+prochain+",message,s"+init+")");
+			
+			deplacer(Sommet.trouverSommet("s"+prochain));// ____ deplacer le jeton vers le sommet prochain
+			faire_suivant(prochain,init,graphe,Pere);
+		}
+		System.out.println("_______________ end ______________________");
+		txt.append("\n _______________ end ______________________");
+		
+	}
+	  class PlayAnimation implements Runnable{
+		    public void run() {
+		    	parcourGraphe();                   
+		    }               
+		  } 
+	
+}

@@ -1,0 +1,62 @@
+package sma.agents;
+
+import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.lang.acl.ACLMessage;
+import jade.wrapper.ControllerException;
+
+public class MyAgent extends Agent 
+{
+	@Override
+	protected void setup() {
+		System.out.println("Creation et inisalisation d'agent "+this.getAID().getName());
+		addBehaviour(new CyclicBehaviour() {
+			
+			@Override
+			public void action() {
+				ACLMessage aclmessage=receive();
+				if (aclmessage!=null) 
+				{
+					System.out.println("Reception du message");
+					System.out.println("contenu de message "+aclmessage.getContent() );
+					System.out.println("acte de communication "+ACLMessage.getPerformative(aclmessage.getPerformative()));
+					
+					ACLMessage reponse=aclmessage.createReply();
+					reponse.setContent("message bien recu §§");
+					send(reponse);
+				} 
+				else
+				{
+						block();
+				}
+				
+			}
+		});
+	}
+	@Override
+	protected void beforeMove() {
+		try {
+			System.out.println("avant immigration d'agent "+this.getAID().getName());
+			System.out.println("de "+this.getContainerController().getContainerName());
+		} catch (ControllerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	@Override
+	protected void afterMove() {
+		try {
+			System.out.println("apres immigration d'agent "+this.getAID().getName());
+			System.out.println("vers "+this.getContainerController().getContainerName());
+		} catch (ControllerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	@Override
+	protected void takeDown() {
+		System.out.println("d'agent "+this.getAID().getName()+" va mourir");
+	}
+
+}

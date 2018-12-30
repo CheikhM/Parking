@@ -1,0 +1,104 @@
+
+
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import GarageCorba.IGarageRemote;
+import GarageCorba.IGarageRemoteHelper;
+import GarageCorba.Voiture;
+
+public class GuichetRestitutionCorba {
+
+	public static void main(String[] args) {
+		try 
+		{
+			//_______________ interface graphique___________________
+			
+			
+			
+			
+			
+			
+			//____jndi 
+			Context ctx=new InitialContext();
+			//____
+			Object obj=ctx.lookup("Garage1");
+			IGarageRemote stub=IGarageRemoteHelper.narrow((org.omg.CORBA.Object)obj);
+			createFenetre(stub);
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+	}
+	private static void createFenetre(IGarageRemote stb) 
+	{
+		JButton restituer=new JButton("Restituer");
+		JButton ok=new JButton("ok");
+		JComboBox cb = new JComboBox();
+		JTextField status=new JTextField("", 20);
+		status.setEnabled(false);
+		cb.setEditable(false);
+		
+		
+		JPanel pane = new JPanel();
+		JPanel panerst = new JPanel();
+		JPanel panecb = new JPanel();
+		
+		panerst.add(restituer);
+		panecb.add(cb);
+		panecb.add(ok);
+		pane.setLayout(new GridLayout(3,1));
+		pane.add(panerst, BorderLayout.CENTER);
+		pane.add(panecb, BorderLayout.CENTER);
+		pane.add(status, BorderLayout.LINE_END);
+        //__________ action ---------------
+		
+		
+		
+		
+		restituer.addActionListener(new ActionListener() 
+		{
+			
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				cb.removeAllItems();
+				cb.addItem("coucou");
+				cb.addItem("boubou");
+			}
+		});
+		ok.addActionListener(new ActionListener() 
+		{
+			
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				cb.removeAllItems();
+				cb.addItem("coucou");
+				cb.addItem("boubou");
+			}
+		});
+		
+		
+		JFrame Guichet = new JFrame("Guichet Location Garage 1");
+		Guichet.setBounds(850, 10, 300, 200);
+		Guichet.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		Guichet.add(pane);
+		Guichet.setVisible(true);
+    }
+
+}

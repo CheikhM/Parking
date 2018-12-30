@@ -1,0 +1,47 @@
+package serveur;
+
+import java.util.ArrayList;
+
+import GarageCorba.IGarageRemotePOA;
+import GarageCorba.Voiture;
+
+public class ServiceImp extends IGarageRemotePOA{
+
+	
+	private final int PLACE=3;
+	
+    public ArrayList<Voiture> voitures=new ArrayList<Voiture>();
+    
+	@Override
+	public Voiture[] afficheVoitures() 
+	{
+		Voiture[] tab=new Voiture[PLACE];
+		tab[0]=new Voiture(11,"Garage1","G1V1");
+		tab[1]=new Voiture(12, "Garage1","G1V2");
+		tab[2]=new Voiture(13,"Garage1","G1V3");
+		return tab;
+	}
+	@Override
+	public void Restituer(Voiture v) 
+	{
+		voitures.add(v);
+	}
+	@Override
+	public void Louer(Voiture v)
+	{
+		int i=0;
+		for (Voiture voiture : voitures) 
+		{
+			if (voiture.matricule==v.matricule) 
+			{
+				voitures.remove(i);
+			}
+			i++;
+		}
+	}
+
+	
+
+	
+
+}

@@ -1,0 +1,44 @@
+import javax.naming.Context;
+import javax.naming.InitialContext;
+
+import org.omg.CORBA.ORB;
+import org.omg.CORBA.Object;
+import org.omg.PortableServer.POA;
+import org.omg.PortableServer.POAHelper;
+
+import GarageCorba.Voiture;
+import serveur.ServiceImp;
+
+
+public class ServeurCorba {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		try {
+			ORB orb=ORB.init(args,null);
+			POA rootPOA= POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
+			rootPOA.the_POAManager().activate();
+			ServiceImp bs=new ServiceImp();
+			bs.voitures[0]=new Voiture("G1v1","R","Garage1");
+			bs.voitures[1]=new Voiture("G1v2","R","Garage1");
+			bs.voitures[2]=new Voiture("G1v3","R","Garage1");
+			//----jndi
+			Context ctx=new InitialContext();
+			
+			//__publier lq reference 
+			Object ref=rootPOA.servant_to_reference(bs);
+			System.out.println(ref);
+			ctx.rebind("Garage1", ref);
+			orb.run();
+			System.out.println("serveurs");
+			
+		} catch (Exception  e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+}
+	
+}
+
+

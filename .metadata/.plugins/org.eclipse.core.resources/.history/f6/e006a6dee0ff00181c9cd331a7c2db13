@@ -1,0 +1,86 @@
+import java.awt.TextArea;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.swing.JFrame;
+
+import org.omg.CORBA.ORB;
+import org.omg.CORBA.Object;
+import org.omg.PortableServer.POA;
+import org.omg.PortableServer.POAHelper;
+
+import GarageCorba.Voiture;
+import serveur.ServiceImp;
+
+
+public class ServeurCorba {
+
+	public static void main(String[] args) 
+	{
+		// TODO Auto-generated method stub
+		try {
+			
+			//_______________ interface graphique___________________
+			JFrame Garage0 = new JFrame("Garage numero 0");
+			Garage0.setBounds(500, 10, 300, 200);
+			Garage0.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			
+			
+			
+			
+			//_______________ publier la reference ___________________
+			ORB orb=ORB.init(args,null);
+			POA rootPOA= POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
+			rootPOA.the_POAManager().activate();
+			ServiceImp bs=new ServiceImp();
+			bs.mesVoitures.put(11,new Voiture(11,"Garage1","G1V1"));
+			bs.mesVoitures.put(12,new Voiture(12, "Garage1","G1V2"));
+			bs.mesVoitures.put(13,new Voiture(13,"Garage1","G1V3"));
+			
+			
+			//----jndi
+			Context ctx=new InitialContext();
+			
+			//__publier lq reference 
+			Object ref=rootPOA.servant_to_reference(bs);
+			System.out.println(ref);
+			ctx.rebind("Garage1", ref);
+			//_________________ affichage ____________
+			Garage0.add(bs.txt);
+			bs.txt.setEditable(false);
+			Voiture[] vts=bs.afficheVoitures();
+			txt.append("\n");
+			if (vts[0].matricule==10101) 
+			{
+				
+			} 
+			else
+			{
+				for (Voiture voiture : vts) 
+				{
+						txt.append(voiture.name+"\n");
+				}
+			}
+			
+			
+			Garage0.setVisible(true);
+			
+			//___________ demarrer serveur _____________
+			orb.run();
+			System.out.println("serveurs");
+			
+			
+			
+		} catch (Exception  e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+ }
+	
+	
+	
+	
+}
+
+

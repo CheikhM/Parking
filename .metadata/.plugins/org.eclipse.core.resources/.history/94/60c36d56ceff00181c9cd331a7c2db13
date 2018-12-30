@@ -1,0 +1,45 @@
+package serveur;
+
+import java.util.ArrayList;
+
+import GarageCorba.IGarageRemotePOA;
+import GarageCorba.Voiture;
+
+public class ServiceImp extends IGarageRemotePOA{
+
+	public Voiture[] voitures=new Voiture[3];
+
+	@Override
+	public Voiture[] afficheVoitures() 
+	{
+		// TODO Auto-generated method stub
+		return voitures;
+	}
+
+	@Override
+	public void deplacerVoiture(Voiture v) 
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void nouvelleVoiture(int matricule, String etat, String src_garage,
+			String name) {
+		voitures[voitures.length]=new Voiture(matricule,etat, src_garage,name);
+		
+	}
+
+	@Override
+	public void Restituer(Voiture v) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void Louer(Voiture v) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

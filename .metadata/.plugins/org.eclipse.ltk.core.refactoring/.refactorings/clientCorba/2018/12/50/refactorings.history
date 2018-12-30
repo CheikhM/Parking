@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;jndi.properties&apos; to &apos;GarageCorba/src&apos;&#x0A;- Original project: &apos;clientCorba&apos;&#x0A;- Destination element: &apos;GarageCorba/src&apos;&#x0A;- Original element: &apos;jndi.properties&apos;" description="Copy file" destination="=GarageCorba/src" element1="src/jndi.properties" files="1" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1544721373111" units="0" version="1.0"/>
+</session>
